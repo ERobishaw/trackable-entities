@@ -530,10 +530,18 @@ namespace TrackableEntities.EF5
             }
         }
 
+        private Type GetEntityType(Type type)
+        {
+            var isProxy = type.Namespace == "System.Data.Entity.DynamicProxies";
+            return isProxy ? type.BaseType : type;
+        }
+
         private static EntityType GetEdmSpaceType(this DbContext dbContext, Type entityType)
         {
             MetadataWorkspace workspace = ((IObjectContextAdapter)dbContext)
                 .ObjectContext.MetadataWorkspace;
+
+            var entityType = GetEntityType(entityType);
 
             StructuralType oType = workspace.GetItems<StructuralType>(DataSpace.OSpace)
                 .Where(e => e.FullName == entityType.FullName).SingleOrDefault();
